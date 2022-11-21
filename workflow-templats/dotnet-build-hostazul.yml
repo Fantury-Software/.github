@@ -1,0 +1,78 @@
+name: .NET 6 Build and Deploy Standard to IIS Host Azul
+
+on: 
+  push:
+   branches:
+      - [$default-bransh]
+
+jobs:
+  job_1:
+    env:
+      APP_NAME: AppYouName
+      APP_NAME_PATH: AppYouNamePath
+
+    name: Build and Deploy 
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2       
+
+    - name: App Settings Variable Substitution
+      uses: microsoft/variable-substitution@v1
+      with: 
+        files: 'src/${{env.APP_NAME_PATH}}/appsettings.json'
+      env:
+        ConnectionStrings.MySqlConnectionString: ${{ secrets.CONNECTION_STRINGS }}
+        JwtSettings.Secret: ${{ secrets.JWTSETTINGS_SECRET }}
+        JwtSettings.Expires: ${{ secrets.JWTSETTINGS_EXPIRES }}
+        JwtSettings.Issuer: ${{ secrets.JWTSETTINGS_ISSUER }}
+        JwtSettings.Audience: ${{ secrets.JWTSETTINGS_AUDIENCE }}
+
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x   
+
+    - name: Restore
+      run: dotnet restore
+
+    # dotnet build and publish
+    - name: Build with dotnet
+      run: dotnet build --configuration Release 
+
+    - name: Dotnet publish 
+      run: dotnet publish -c Release -o ${{env.APP_NAME}}   
+   
+    - name: Create app_offline.htm
+      run:  |
+        mkdir D:/a/tmp
+        echo "Updating, please wait" > D:/a/tmp/app_offline.htm
+
+    - name: Stop IIS in Host
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+         server: ${{ secrets.ftp_host }}
+         username: ${{ secrets.ftp_user }}
+         password: ${{ secrets.ftp_password }}
+         local-dir: D:/a/tmp/
+         server-dir: /${{ secrets.server_dir }}/
+
+    - name: Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+         server: ${{ secrets.ftp_host }}
+         username: ${{ secrets.ftp_user }}
+         password: ${{ secrets.ftp_password }}
+         local-dir: D:/a/${{env.APP_NAME}}/${{env.APP_NAME}}/${{env.APP_NAME}}/
+         server-dir: /${{ secrets.server_dir }}/
+
+    - name: Restart IIS in Host
+      shell: python
+      run: |
+        import ftplib
+        ftp = ftplib.FTP('${{ secrets.ftp_host }}')
+        ftp.login('${{ secrets.ftp_user }}', '${{ secrets.ftp_password }}')
+        ftp.cwd('/${{ secrets.server_dir }}')
+        ftp.delete('app_offline.htm')
+        ftp.quit()        
