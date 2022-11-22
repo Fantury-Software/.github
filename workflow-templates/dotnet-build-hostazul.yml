@@ -8,7 +8,7 @@ jobs:
   job_1:
     env:
       APP_NAME: AppYouName
-      APP_NAME_PATH: AppYouNamePath
+      APP_NAME_PATH: AppYouNamePath # project name
 
     name: Build and Deploy 
     runs-on: windows-latest

@@ -1,0 +1,38 @@
+name: Angular Build and Deploy Standard to IIS Host Azul
+
+on: 
+  push:
+   branches: [ $default-branch ]
+
+jobs:
+  job_1:
+    env:
+      APP_NAME: AppYouName
+
+    name: Build and Deploy 
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2       
+
+    - name: Setup Node.js 14 LTS
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  
+
+    - name: Install NPM Modules
+      run: npm install
+
+    - name: Build Project
+      run: npm run build -- --prod
+
+    - name: Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.0.0
+      with:
+         server: ${{ secrets.ftp_host }}
+         username: ${{ secrets.ftp_user }}
+         password: ${{ secrets.ftp_password }}
+         local-dir: ./dist/${{env.APP_NAME}}/
+         server-dir: /${{ secrets.server_dir }}/
+         dangerous-clean-slate: true
