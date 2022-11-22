@@ -1,2 +1,2 @@
 # .github
-DotNet Build and Deploy Standard
+Templetes Build and Deploy Standard
