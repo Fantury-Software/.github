@@ -1,5 +1,7 @@
 {
     "name": "Angular Build and Deploy Standard",
     "description" : "Template Fantury Software for project Angular 14 Build and Deploy to IIS Host Azul",
-    "category" : [ "TypeScript" ]
+    "category" : [ 
+        "TypeScript" 
+    ]
 }
