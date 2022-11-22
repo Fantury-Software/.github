@@ -1,7 +1,7 @@
 {
     "name": "DotNet Build and Deploy Standard",
     "description" : "Template Fantury Software for project .Net 6 Build and Deploy to IIS Host Azul",
-    "category" : [
+    "categories" : [
         "C#"
     ]
 }
