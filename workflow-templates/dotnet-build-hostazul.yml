@@ -2,8 +2,7 @@ name: .NET 6 Build and Deploy Standard to IIS Host Azul
 
 on: 
   push:
-   branches:
-      - [ $default-bransh ]
+   branches: [ $default-branch ]
 
 jobs:
   job_1:
